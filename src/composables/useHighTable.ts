@@ -1,11 +1,14 @@
-import { ref, Ref } from 'vue';
+import { ref, type Ref } from 'vue';
 import { API } from './API';
 
 interface HighTableMember {
-  id: string;
   walletAddress: string;
-  name: string;
-  // Add other High Table member properties as needed
+  firmName: string;
+  jurisdiction: string[];
+  legalExpertise: string[];
+  reputation: number;
+  casesHandled: number;
+  joinDate: Date;
 }
 
 export function useHighTable() {
@@ -17,8 +20,7 @@ export function useHighTable() {
     loading.value = true;
     error.value = null;
     try {
-      // Assume there's an API endpoint for fetching High Table members
-      const response = await fetch(`${API.API_BASE_URL}/v1/high-table/members`);
+      const response = await API.getHighTableMembers();
       const data = await response.json();
       members.value = data;
     } catch (err) {
@@ -29,15 +31,51 @@ export function useHighTable() {
     }
   };
 
-  const updateCampaignStatus = async (campaignId: string, status: string, updaterAddress: string) => {
+  const addMember = async (memberData: Omit<HighTableMember, 'reputation' | 'casesHandled' | 'joinDate'>) => {
     loading.value = true;
     error.value = null;
     try {
-      const response = await API.updateCampaignStatus(campaignId, status, updaterAddress);
+      const response = await API.addHighTableMember(memberData);
       const data = await response.json();
+      members.value.push(data);
       return data;
     } catch (err) {
-      error.value = 'Failed to update campaign status';
+      error.value = 'Failed to add High Table member';
+      console.error(err);
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const updateMember = async (walletAddress: string, updateData: Partial<HighTableMember>) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const response = await API.updateHighTableMember(walletAddress, updateData);
+      const data = await response.json();
+      const index = members.value.findIndex(member => member.walletAddress === walletAddress);
+      if (index !== -1) {
+        members.value[index] = { ...members.value[index], ...data };
+      }
+      return data;
+    } catch (err) {
+      error.value = 'Failed to update High Table member';
+      console.error(err);
+      throw err;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const removeMember = async (walletAddress: string) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      await API.removeHighTableMember(walletAddress);
+      members.value = members.value.filter(member => member.walletAddress !== walletAddress);
+    } catch (err) {
+      error.value = 'Failed to remove High Table member';
       console.error(err);
       throw err;
     } finally {
@@ -50,6 +88,8 @@ export function useHighTable() {
     loading,
     error,
     fetchMembers,
-    updateCampaignStatus
+    addMember,
+    updateMember,
+    removeMember
   };
 }

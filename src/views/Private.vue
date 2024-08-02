@@ -22,9 +22,12 @@
             <h2 class="text-xl font-semibold mb-4">Funds Management</h2>
             <p><strong>{{ caseData.funds.balanceTitle }}:</strong> {{ caseData.funds.balance }}</p>
             <p><strong>Distribution Rules:</strong> {{ caseData.funds.distributionRules }}</p>
-            <button @click="requestFundDistribution" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded">
-              {{ caseData.funds.claimButtonText }}
-            </button>
+            <button
+  class="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+  @click="() => requestFundDistribution(caseData.id)"
+>
+  {{ caseData.funds.claimButtonText }}
+</button>
             <p class="mt-4 text-sm text-red-500">{{ caseData.funds.bottomWarningText }}</p>
           </div>
         </div>
@@ -84,28 +87,71 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useFormatter } from '@/composables/currencyFormatter';
+import { formatCurrency } from '@/composables/currencyFormatter';
 import { useShare } from '@/composables/share';
 import { mock } from '@/utils/mocks/private';
-import { openWalletModalProvider } from '@/composables/openWalletModalProvider'
-import { useWallet } from 'solana-wallets-vue';
 import { useRoute, useRouter } from "vue-router";
 import { showToast } from '@/composables/toast'
-import ContributionsPopup from '@/components/ContributionsPopup.vue';
 import { useCampaign } from '@/composables/useCampaign';
 import { useAuth } from '@/composables/useAuth';
 import { useBonoWallet } from '@/composables/useWallet';
 import { SolanaManager } from '@/managers/SolanaManager';
+import { Connection, PublicKey } from '@solana/web3.js';
 
+// Define interfaces
+interface DynamicData {
+  title: string | null;
+  description: string | null;
+  host: string | null;
+  token: string | null;
+  tokenAddress: string | null;
+  goal: number | null;
+  balance: number | null;
+  withdrawn: number | null;
+  contributors: never[];
+  uniqueWalletsCount: number | null;
+  transactionsCount: number | null;
+  walletAddress: string | null;
+}
+
+interface CaseData {
+  id: string;
+  title: string;
+  image1: string;
+  image2: string;
+  description: string;
+  shareTo: {
+    text: string;
+    btns: Array<{ text: string; actionLink: Function; bgColor: string }>;
+  };
+  stats: {
+    currency: string;
+    balance: number;
+    status: string;
+    // ... other stats properties
+  };
+  funds: {
+    // ... funds properties
+  };
+  highTable: {
+    // ... highTable properties
+  };
+  legalFirm: {
+    // ... legalFirm properties
+  };
+  legalDisclaimer: {
+    // ... legalDisclaimer properties
+  };
+}
 
 const router = useRouter();
 const route = useRoute();
-const { publicKey, connected, connect } = useBonoWallet();
-const { getCampaignPrivate, requestFundDistribution } = useCampaign();
+const { publicKey, connected, connect, sendTransaction } = useBonoWallet();
+const { getCampaignPrivate, updateCampaign } = useCampaign();
+const { isHighTable } = useAuth();
 
-const caseData = ref(mock); // Initialize with mock data
-
-const dynamicData = ref({
+const caseData = ref<CaseData>(mock);
+const dynamicData = ref<DynamicData>({
   title: null,
   description: null,
   host: null,
@@ -117,9 +163,8 @@ const dynamicData = ref({
   contributors: [],
   uniqueWalletsCount: null,
   transactionsCount: null,
+  walletAddress: null,
 });
-
-const publicKeyToShare = ref("");
 
 const claim = async () => {
   if (!publicKey.value) {
@@ -129,10 +174,10 @@ const claim = async () => {
 
   try {
     const connection = new Connection(process.env.VUE_APP_SOLANA_RPC_URL as string);
-    const transaction = await SolanaManager.createClaimTransaction(
-      new PublicKey(dynamicData.value.walletAddress),
-      publicKey.value,
-      dynamicData.value.balance
+    const transaction = await SolanaManager.createTransaction(
+      new PublicKey(dynamicData.value.walletAddress ?? ''),
+      publicKey.value.toString(),
+      dynamicData.value.balance ?? 0
     );
 
     const signature = await sendTransaction(transaction, connection);
@@ -143,6 +188,27 @@ const claim = async () => {
   } catch (error) {
     console.error('Failed to claim funds:', error);
     showToast('Failed to claim funds. Please try again.', 'error');
+  }
+};
+
+const requestFundDistribution = async () => {
+  if (!connected.value) {
+    await connect();
+    return;
+  }
+
+  try {
+    const result = await requestFundDistribution(caseData.value.id, publicKey.value!.toString());
+    if (result !== undefined) {
+      showToast('Fund distribution request submitted successfully', 'success');
+      // Refresh case data to reflect the new request
+      caseData.value = await getCampaignPrivate(caseData.value.id);
+    } else {
+      showToast('Failed to submit fund distribution request', 'error');
+    }
+  } catch (error) {
+    console.error('Fund distribution request error:', error);
+    showToast('An error occurred while processing your request', 'error');
   }
 };
 const fetchCampaignData = async () => {
@@ -199,10 +265,9 @@ const editCampaignDetails = async () => {
   }
 
   try {
-    const newTitle = prompt('Enter new title:', dynamicData.value.title);
-    const newDescription = prompt('Enter new description:', dynamicData.value.description);
-    const newGoalAmount = prompt('Enter new goal amount:', dynamicData.value.goalAmount.toString());
-
+    const newTitle = prompt('Enter new title:', dynamicData.value.title ?? '');
+    const newDescription = prompt('Enter new description:', dynamicData.value.description ?? '') ?? '';
+    const newGoalAmount = prompt('Enter new goal amount:', (dynamicData.value.goal ?? 0).toString()) ?? '';
     if (!newTitle && !newDescription && !newGoalAmount) return;
 
     const updates: any = {};
@@ -234,39 +299,29 @@ onMounted(async () => {
   }
 });
 
-const share = (actionLink: Function) => {
+const share = (actionLink: Function | string) => {
   const url = window.location.href;
   const title = caseData.value.title;
 
-  if (actionLink === 'copy') {
+  if (typeof actionLink === 'string' && actionLink === 'copy') {
     navigator.clipboard.writeText(url);
     showToast('Link copied to clipboard', 'success');
-  } else {
+  } else if (typeof actionLink === 'function') {
     window.open(actionLink(url, title), '_blank');
   }
 };
 
-const requestFundDistribution = async () => {
-  if (!connected.value) {
-    await connect();
-    return;
-  }
-
-  try {
-    const result = await requestFundDistribution(caseData.value.id, publicKey.value!.toString());
-    if (result) {
-      showToast('Fund distribution request submitted successfully', 'success');
-      // Refresh case data to reflect the new request
-      caseData.value = await getCampaignPrivate(caseData.value.id);
-    } else {
-      showToast('Failed to submit fund distribution request', 'error');
-    }
-  } catch (error) {
-    console.error('Fund distribution request error:', error);
-    showToast('An error occurred while processing your request', 'error');
-  }
-};
 </script>
+<template>
+  <!-- ... rest of your template ... -->
+  <button
+    class="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+    @click="() => requestFundDistribution(caseData.id)"
+  >
+    {{ caseData.funds.claimButtonText }}
+  </button>
+  <!-- ... rest of your template ... -->
+</template>
 
 <style lang="scss" scoped>
 .gradient-block {
@@ -275,3 +330,4 @@ const requestFundDistribution = async () => {
     linear-gradient(90.96deg, #59B4F8 0.96%, #D917BC 101.76%) border-box;
 }
 </style>
+

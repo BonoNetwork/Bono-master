@@ -1,6 +1,7 @@
 import { ref, type Ref } from 'vue';
 import { API } from './API';
 
+// Define the Campaign interface
 interface Campaign {
   id: string;
   title: string;
@@ -9,16 +10,68 @@ interface Campaign {
   currentAmount: number;
   endDate: string;
   status: string;
-  // Add other campaign properties as needed
+  stats: {
+    currency: string;
+    balance: number;
+    withdrawn: number;
+    goal: number;
+    caseOwner: string;
+    legalFirm: string;
+    status: string;
+    highTableApproval: string;
+  };
+  contribution: {
+    title: string;
+    fee: string;
+    options: Array<{
+      id: string;
+      title: string;
+      description: string;
+      amount: number;
+    }>;
+    field1Placeholder: string;
+    field2Placeholder: string;
+    buttonText: string;
+    contributionsText: string;
+  };
+  caseDetails: {
+    incidentDate: string;
+    jurisdiction: string;
+    caseType: string;
+    evidenceSummary: string;
+  };
+  legalUpdate: {
+    lastUpdate: string;
+    status: string;
+    nextSteps: string;
+  };
+  shareTo: {
+    text: string;
+    btns: Array<{
+      text: string;
+      actionLink: Function;
+      bgColor: string;
+    }>;
+  };
+  legalDisclaimer: {
+    text: string;
+    buttons: Array<{
+      text: string;
+      action: Function;
+    }>;
+  };
 }
 
+
+
 export function useCampaign() {
+  // Reactive references for campaigns and current campaign
   const campaigns: Ref<Campaign[]> = ref([]);
   const currentCampaign: Ref<Campaign | null> = ref(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
-  
 
+  // Fetch all campaigns
   const fetchCampaigns = async () => {
     loading.value = true;
     error.value = null;
@@ -34,6 +87,7 @@ export function useCampaign() {
     }
   };
 
+  // Fetch a single campaign by ID
   const fetchCampaign = async (id: string) => {
     loading.value = true;
     error.value = null;
@@ -49,6 +103,7 @@ export function useCampaign() {
     }
   };
 
+  // Create a new campaign
   const createCampaign = async (campaignData: any) => {
     loading.value = true;
     error.value = null;
@@ -66,6 +121,7 @@ export function useCampaign() {
     }
   };
 
+  // Contribute to a campaign
   const contributeToCampaign = async (campaignId: string, contributionData: any) => {
     loading.value = true;
     error.value = null;
@@ -85,34 +141,52 @@ export function useCampaign() {
       loading.value = false;
     }
   };
+
+  // Get private campaign data
   const getCampaignPrivate = async (campaignId: string) => {
-    const response = await fetch(`/api/campaigns/${campaignId}/private`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch campaign data');
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}/private`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch campaign data');
+      }
+      return await response.json();
+    } catch (err) {
+      console.error('Failed to fetch private campaign data:', err);
+      throw err;
     }
-    return await response.json();
   };
 
+  // Update a campaign
   const updateCampaign = async (campaignId: string, updates: any) => {
-    const response = await fetch(`/api/campaigns/${campaignId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updates)
-    });
-    if (!response.ok) {
-      throw new Error('Failed to update campaign');
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update campaign');
+      }
+      return await response.json();
+    } catch (err) {
+      console.error('Failed to update campaign:', err);
+      throw err;
     }
-    return await response.json();
   };
 
+  // Claim funds from a campaign
   const claimFunds = async (campaignId: string, walletAddress: string) => {
-    // This should be replaced with an actual API call to claim funds
-    const response = await fetch(`/api/campaigns/${campaignId}/claim`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ walletAddress })
-    });
-    return await response.json();
+    try {
+      const response = await fetch(`/api/campaigns/${campaignId}/claim`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ walletAddress }),
+      });
+      return await response.json();
+    } catch (err) {
+      console.error('Failed to claim funds:', err);
+      throw err;
+    }
   };
 
   return {
@@ -125,7 +199,7 @@ export function useCampaign() {
     createCampaign,
     contributeToCampaign,
     getCampaignPrivate,
+    updateCampaign,
     claimFunds,
-    updateCampaign
   };
 }

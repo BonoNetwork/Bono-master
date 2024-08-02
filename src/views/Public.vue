@@ -2,44 +2,44 @@
   <div class="min-h-screen bg-gradient-to-r from-blue-500 to-teal-400 py-12">
     <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
       <div class="p-8">
-        <h1 class="text-3xl font-bold mb-4">{{ mock.title }}</h1>
-        <p class="text-gray-600 mb-6">{{ mock.description }}</p>
+        <h1 class="text-3xl font-bold mb-4">{{ currentCampaign.value?.title }}</h1>
+        <p class="text-gray-600 mb-6">{{ currentCampaign.value?.description }}</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div class="bg-gray-100 p-6 rounded-lg">
             <h2 class="text-xl font-semibold mb-4">Case Statistics</h2>
-            <p><strong>Balance:</strong> {{ mock.stats.balance }} {{ mock.stats.currency }}</p>
-            <p><strong>Withdrawn:</strong> {{ mock.stats.withdrawn }} {{ mock.stats.currency }}</p>
-            <p><strong>Goal:</strong> {{ mock.stats.goal }} {{ mock.stats.currency }}</p>
-            <p><strong>Case Owner:</strong> {{ mock.stats.caseOwner }}</p>
-            <p><strong>Legal Firm:</strong> {{ mock.stats.legalFirm }}</p>
-            <p><strong>Status:</strong> {{ mock.stats.status }}</p>
-            <p><strong>High Table Approval:</strong> {{ mock.stats.highTableApproval }}</p>
+            <p><strong>Balance:</strong> {{ currentCampaign.value?.stats.balance }} {{ currentCampaign.value?.stats.currency }}</p>
+            <p><strong>Withdrawn:</strong> {{ currentCampaign.value?.stats.withdrawn }} {{ currentCampaign.value?.stats.currency }}</p>
+            <p><strong>Goal:</strong> {{ currentCampaign.value?.stats.goal }} {{ currentCampaign.value?.stats.currency }}</p>
+            <p><strong>Case Owner:</strong> {{ currentCampaign.value?.stats.caseOwner }}</p>
+            <p><strong>Legal Firm:</strong> {{ currentCampaign.value?.stats.legalFirm }}</p>
+            <p><strong>Status:</strong> {{ currentCampaign.value?.stats.status }}</p>
+            <p><strong>High Table Approval:</strong> {{ currentCampaign.value?.stats.highTableApproval }}</p>
           </div>
           <div class="bg-gray-100 p-6 rounded-lg">
             <h2 class="text-xl font-semibold mb-4">Case Details</h2>
-            <p><strong>Incident Date:</strong> {{ mock.caseDetails.incidentDate }}</p>
-            <p><strong>Jurisdiction:</strong> {{ mock.caseDetails.jurisdiction }}</p>
-            <p><strong>Case Type:</strong> {{ mock.caseDetails.caseType }}</p>
-            <p><strong>Evidence Summary:</strong> {{ mock.caseDetails.evidenceSummary }}</p>
+            <p><strong>Incident Date:</strong> {{ currentCampaign.value?.caseDetails.incidentDate }}</p>
+            <p><strong>Jurisdiction:</strong> {{ currentCampaign.value?.caseDetails.jurisdiction }}</p>
+            <p><strong>Case Type:</strong> {{ currentCampaign.value?.caseDetails.caseType }}</p>
+            <p><strong>Evidence Summary:</strong> {{ currentCampaign.value?.caseDetails.evidenceSummary }}</p>
           </div>
         </div>
 
         <div class="mb-8">
           <h2 class="text-2xl font-bold mb-4">Legal Update</h2>
           <div class="bg-blue-100 p-6 rounded-lg">
-            <p><strong>Last Update:</strong> {{ mock.legalUpdate.lastUpdate }}</p>
-            <p><strong>Status:</strong> {{ mock.legalUpdate.status }}</p>
-            <p><strong>Next Steps:</strong> {{ mock.legalUpdate.nextSteps }}</p>
+            <p><strong>Last Update:</strong> {{ currentCampaign.value?.legalUpdate.lastUpdate }}</p>
+            <p><strong>Status:</strong> {{ currentCampaign.value?.legalUpdate.status }}</p>
+            <p><strong>Next Steps:</strong> {{ currentCampaign.value?.legalUpdate.nextSteps }}</p>
           </div>
         </div>
 
         <div class="mb-8">
-          <h2 class="text-2xl font-bold mb-4">{{ mock.contribution.title }}</h2>
-          <p class="text-sm text-gray-600 mb-4">{{ mock.contribution.fee }}</p>
+          <h2 class="text-2xl font-bold mb-4">{{ currentCampaign.value?.contribution?.title }}</h2>
+          <p class="text-sm text-gray-600 mb-4">{{ currentCampaign.value?.contribution?.fee }}</p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <button
-              v-for="option in mock.contribution.options"
+              v-for="option in currentCampaign.value?.contribution?.options"
               :key="option.id"
               @click="selectContributionAmount(option.amount)"
               class="p-4 border rounded-lg hover:bg-gray-100 transition-colors"
@@ -51,14 +51,14 @@
           <div class="mb-4">
             <input
               v-model="contributorName"
-              :placeholder="mock.contribution.field1Placeholder"
+              :placeholder="currentCampaign.value?.contribution?.field1Placeholder"
               class="w-full p-2 border rounded-lg"
             />
           </div>
           <div class="mb-4">
             <textarea
               v-model="contributorComment"
-              :placeholder="mock.contribution.field2Placeholder"
+              :placeholder="currentCampaign.value?.contribution?.field2Placeholder"
               class="w-full p-2 border rounded-lg"
               rows="3"
             ></textarea>
@@ -67,12 +67,12 @@
             @click="contribute"
             class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
           >
-            {{ mock.contribution.buttonText }}
+            {{ currentCampaign.value?.contribution?.buttonText }}
           </button>
         </div>
 
         <div class="mb-8">
-          <h2 class="text-2xl font-bold mb-4">{{ mock.contribution.contributionsText }}</h2>
+          <h2 class="text-2xl font-bold mb-4">{{ currentCampaign.value?.contribution?.contributionsText }}</h2>
           <div class="bg-gray-100 p-4 rounded-lg">
             <!-- Add a list of recent contributions here -->
           </div>
@@ -82,7 +82,7 @@
           <h2 class="text-2xl font-bold mb-4">Share This Case</h2>
           <div class="flex space-x-4">
             <button
-              v-for="btn in mock.shareTo.btns"
+              v-for="btn in currentCampaign.value?.shareTo.btns"
               :key="btn.text"
               @click="share(btn.actionLink)"
               class="py-2 px-4 rounded-lg text-white"
@@ -93,66 +93,90 @@
           </div>
         </div>
 
-        <div class="text-sm text-gray-600" v-html="mock.legalDisclaimer.text"></div>
+        <div class="text-sm text-gray-600" v-html="currentCampaign.value?.legalDisclaimer.text"></div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch, onMounted, nextTick } from 'vue';
 import { useRoute, useRouter } from "vue-router";
-import { useBonoWallet} from '@/composables/useWallet';
+import { useBonoWallet } from '@/composables/useWallet';
 import { useCampaign } from '@/composables/useCampaign';
-import { useFormatter } from '@/composables/currencyFormatter';
 import { useShare } from '@/composables/share';
 import { formatWallet } from '@/composables/formatWallet';
 import { showToast } from '@/composables/toast';
 import { kSupportedTokens } from '@/composables/Tokens';
 import ContributionsPopup from '@/components/ContributionsPopup.vue';
+import { mock } from '@/utils/mocks/public'; // Correctly import public mock data
 
 const route = useRoute();
 const router = useRouter();
 const { connected, publicKey, connect, sendTransaction } = useBonoWallet();
-const { getCampaign, contributeToCampaign } = useCampaign();
+const { currentCampaign, fetchCampaign, contributeToCampaign } = useCampaign();
 
 const amount = ref(0);
 const contributionsPopupOpened = ref(false);
 const field1 = ref("");
 const field2 = ref("");
 const amountInput = ref();
-const caseData = ref<any>(null);
 const contributionAmount = ref(0);
 const contributorName = ref('');
 const contributorComment = ref('');
-const dynamicData = ref({
-  title: null,
-  description: null,
-  host: null,
-  token: null,
-  tokenAddress: null,
-  goal: null,
-  balance: null,
-  withdrawn: null,
-  contributors: [],
-  transactions: [],
-  uniqueWalletsCount: null,
-  transactionsCount: null,
+
+// Ensure mock data is compatible with the Campaign interface
+const mockCampaign = {
+  id: "mock-id",
+  walletAddress: "mock-wallet",
+  email: "mock@example.com",
+  title: mock.title,
+  description: mock.description,
+  goalAmount: mock.stats.goal,
+  currentAmount: mock.stats.balance,
+  token: mock.stats.currency,
+  endDate: "2024-12-31",
+  status: mock.stats.status,
+  stats: mock.stats,
+  contribution: mock.contribution,
+  shareTo: mock.shareTo,
+  legalDisclaimer: mock.legalDisclaimer,
+  caseDetails: mock.caseDetails,
+  legalUpdate: mock.legalUpdate
+};
+
+// Fetch campaign data and use mock as fallback
+onMounted(async () => {
+  try {
+    const caseId = route.params.id as string;
+    await fetchCampaign(caseId);
+    if (!currentCampaign.value) {
+      currentCampaign.value = mockCampaign; // Use mock data as fallback
+      showToast('Using mock data as fallback', 'warning');
+    }
+  } catch (error) {
+    console.error('Failed to fetch case data:', error);
+    showToast('Failed to load case data', 'error');
+  }
 });
 
 watch(amountInput, () => {
-  amountInput.value.innerText = '0';
-}, { once: true })
+  if (amountInput.value) {
+    amountInput.value.innerText = '0';
+  }
+}, { once: true });
 
 watch(amount, () => {
   nextTick(() => {
-    amountInput.value.style.width = 0;
-    amountInput.value.style.width = amountInput.value.scrollWidth + 10 + "px";
-  })
-})
+    if (amountInput.value) {
+      amountInput.value.style.width = '0';
+      amountInput.value.style.width = amountInput.value.scrollWidth + 10 + "px";
+    }
+  });
+});
 
 const applyAmount = () => {
-  if (amountInput.value.value > 9_999_999_999) {
+  if (amountInput.value && amountInput.value.value > 9_999_999_999) {
     amountInput.value.value = 9_999_999_999;
   }
 };
@@ -190,50 +214,16 @@ const makeDonation = async () => {
 
 const fetchCampaignData = async () => {
   try {
-    const campaign = await getCampaign(route.params.public_key as string);
-    if (!campaign) {
+    const campaignId = route.params.public_key as string;
+    await fetchCampaign(campaignId);
+    if (!currentCampaign.value) {
       router.push({ name: 'error' });
-      return;
     }
-
-    dynamicData.value = {
-      title: campaign.title,
-      description: campaign.description,
-      host: formatWallet(campaign.host),
-      token: campaign.token,
-      tokenAddress: campaign.tokenAddress,
-      goal: campaign.goalAmount.toString(),
-      balance: campaign.currentAmount,
-      withdrawn: campaign.withdrawn,
-      contributors: campaign.contributors,
-      transactions: campaign.transactions,
-      uniqueWalletsCount: campaign.uniqueContributorsCount,
-      transactionsCount: campaign.transactionsCount,
-    };
   } catch (error) {
     console.error('Failed to fetch campaign data:', error);
     router.push({ name: 'error' });
   }
 };
-
-onMounted(async () => {
-  try {
-    const caseId = route.params.id as string;
-    const fetchedCaseData = await getCampaign(caseId);
-    if (fetchedCaseData) {
-      caseData.value = fetchedCaseData;
-    } else {
-      // If no data is fetched, use mock data as fallback
-      caseData.value = mock;
-      showToast('Using mock data as fallback', 'warning');
-    }
-  } catch (error) {
-    console.error('Failed to fetch case data:', error);
-    showToast('Failed to load case data', 'error');
-    // Use mock data as fallback
-    caseData.value = mock;
-  }
-});
 
 const selectContributionAmount = (amount: number) => {
   contributionAmount.value = amount;
@@ -251,8 +241,8 @@ const contribute = async () => {
   }
 
   try {
-    const result = await contributeToCampaign({
-      campaignId: caseData.value.id,
+    const result = await contributeToCampaign(route.params.public_key as string, {
+      campaignId: currentCampaign.value!.id,
       amount: contributionAmount.value,
       contributorAddress: publicKey.value!.toString(),
       name: contributorName.value,
@@ -262,7 +252,7 @@ const contribute = async () => {
     if (result) {
       showToast('Contribution successful!', 'success');
       // Refresh case data to reflect new contribution
-      caseData.value = await getCampaign(caseData.value.id);
+      await fetchCampaignData();
     } else {
       showToast('Failed to process contribution', 'error');
     }
@@ -274,9 +264,9 @@ const contribute = async () => {
 
 const share = (actionLink: Function) => {
   const url = window.location.href;
-  const title = caseData.value.title;
+  const title = currentCampaign.value?.title;
 
-  if (actionLink === 'copy') {
+  if (typeof actionLink === 'string' && actionLink === 'copy') {
     navigator.clipboard.writeText(url);
     showToast('Link copied to clipboard', 'success');
   } else {

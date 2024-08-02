@@ -5,7 +5,7 @@ import { CampaignManager } from '../../services/CampaignManager';
 import { CampaignNotFoundError } from '../../errors/CampaignNotFoundError';
 import { InsufficientFundsError } from '../../errors/InsufficientFundsError';
 import { isHighTableMember } from '../../middlewares/isHighTableMember';
-import { Helpers } from '../helpers/Helpers';
+import { Helpers } from '../../services/helpers/Helpers';
 
 const router = express.Router();
 

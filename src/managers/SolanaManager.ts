@@ -10,10 +10,28 @@ export interface Amount {
 
 
 export class SolanaManager {
+    static async createClaimTransaction(
+        fromAddress: web3.PublicKey,
+        toAddress: web3.PublicKey,
+        amount: number
+    ): Promise<web3.Transaction> {
+        const web3Conn = this.newConnection();
+        const blockhash = (await web3Conn.getLatestBlockhash()).blockhash;
+        const transaction = await this.createTransaction(toAddress, blockhash);
 
-static makeDonation(arg0: any, caseOwner: string, currency: string, value: any, value1: any, value2: any) {
-throw new Error('Method not implemented.');
-}
+        const instructions: web3.TransactionInstruction[] = [];
+
+        instructions.push(
+            web3.SystemProgram.transfer({
+                fromPubkey: fromAddress,
+                toPubkey: toAddress,
+                lamports: amount
+            })
+        );
+
+        transaction.add(...instructions);
+        return transaction;
+    }
     static newConnection(): web3.Connection {
         return new web3.Connection(import.meta.env.VITE_APP_SOLANA_RPC!);
     }
@@ -65,7 +83,7 @@ throw new Error('Method not implemented.');
         return transaction;
     }
 
-    tatic async makeDonation(fromWalletAddress: string, toWalletAddress: string, tokenAddress: string, amount: number, name?: string, comment?: string): Promise<web3.Transaction | undefined> {
+    static async makeDonation(fromWalletAddress: string, toWalletAddress: string, tokenAddress: string, amount: number, name?: string, comment?: string): Promise<web3.Transaction | undefined> {
         console.log('makeDonation', fromWalletAddress, toWalletAddress, tokenAddress, amount, name, comment);
 
         try {

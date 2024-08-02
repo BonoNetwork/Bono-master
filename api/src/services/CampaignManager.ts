@@ -5,7 +5,7 @@ import { BadRequestError } from '../errors/BadRequestError';
 import { CampaignModel, CampaignStatus, CampaignCreationParams, CampaignContributionParams, CampaignRedemptionParams } from '../models/types';
 import { SolanaManager } from './solana/SolanaManager';
 import { HighTableManager } from './HighTableManager';
-import { Helpers } from '../helpers/Helpers';
+import { Helpers } from './helpers/Helpers';
 
 export class CampaignManager {
     static async createCampaign(params: CampaignCreationParams, creatorId: string): Promise<CampaignModel> {
@@ -35,7 +35,7 @@ export class CampaignManager {
         return Campaign.findById(id);
     }
 
-    static async contributeToCampaign(params: CampaignContributionParams): Promise<CampaignModel> {
+    static async contributeToCampaign(id: string, params: CampaignContributionParams, id: any): Promise<CampaignModel> {
         const { campaignId, contributorAddress, amount } = params;
         const campaign = await Campaign.findById(campaignId);
         const share = Helpers.calculateContributionShare(params.amount, campaign.currentAmount + params.amount);

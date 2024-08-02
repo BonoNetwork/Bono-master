@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
 import { body } from "express-validator";
-import { validateRequest } from "../middlewares/ValidateRequest";
-import { HighTableManager } from "../services/HighTableManager";
-import { isAdmin } from "../middlewares/isAdmin"; // You'll need to create this middleware
+import { validateRequest } from "../../middlewares/ValidateRequest";
+import { HighTableManager } from "../../services/HighTableManager";
+import { isAdmin } from "../../middlewares/isAdmin"; 
 
 const router = express.Router();
 

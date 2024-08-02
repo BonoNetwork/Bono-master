@@ -1,7 +1,7 @@
 import * as mongoose from 'mongoose';
 
-export let Schema = mongoose.Schema;
-export let ObjectId = mongoose.Schema.Types.ObjectId;
+export const Schema = mongoose.Schema;
+export const ObjectId = mongoose.Schema.Types.ObjectId;
 
 export interface ICampaign extends mongoose.Document {
     title: string;

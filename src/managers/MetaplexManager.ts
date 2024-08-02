@@ -1,8 +1,9 @@
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { publicKey, sol, some } from "@metaplex-foundation/umi";
+import { publicKey, some, percentAmount } from "@metaplex-foundation/umi";
 import * as mplCore from '@metaplex-foundation/mpl-core';
 import * as mplTokenMetadata from '@metaplex-foundation/mpl-token-metadata';
-import { CreateTransactionResponse, SolanaManager } from "./SolanaManager";
+import { SolanaManager } from "./SolanaManager";
+import { Connection, PublicKey } from '@solana/web3.js';
 
 export class MetaplexManager {
     static async fetchAssetsByOwner(walletAddress: string) {
@@ -22,17 +23,17 @@ export class MetaplexManager {
     }
 
     static async createCampaignNFT(
-        web3Conn: web3.Connection,
+        web3Conn: Connection,
         campaign: any,
         creator: any
-    ): Promise<CreateTransactionResponse & {assetAddress: string} | undefined> {
+    ): Promise<{ tx: any; blockhash: any; assetAddress: string } | undefined> {
         console.log('createCampaignNFT', campaign, creator);
 
         const umi = createUmi(import.meta.env.VITE_APP_SOLANA_RPC!);
         umi.use(mplTokenMetadata.mplTokenMetadata());
         
         const creatorSigner = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(creator.privateKey));
-        umi.use(mplCore.keypairIdentity(creatorSigner));
+        umi.use(mplCore.createSignerFromKeypair(umi, creatorSigner));
 
         const nftMint = umi.eddsa.generateKeypair();
 
@@ -42,7 +43,7 @@ export class MetaplexManager {
             uri: campaign.metadataUri,
         };
 
-        let transactionBuilder = await SolanaManager.createUmiTransactionBuilder(umi);
+        let transactionBuilder = umi.transactionBuilder();
 
         transactionBuilder = transactionBuilder.add(
             mplTokenMetadata.createV1(umi, {
@@ -50,8 +51,11 @@ export class MetaplexManager {
                 name: metadata.name,
                 symbol: metadata.symbol,
                 uri: metadata.uri,
-                sellerFeeBasisPoints: 0,
-                collection: some(publicKey(process.env.CAMPAIGN_COLLECTION_ADDRESS!)),
+                sellerFeeBasisPoints: percentAmount(0),
+                collection: some({
+                    key: publicKey(process.env.CAMPAIGN_COLLECTION_ADDRESS!),
+                    verified: false
+                }),
             })
         );
 

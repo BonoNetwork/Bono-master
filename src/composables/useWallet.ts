@@ -3,7 +3,7 @@ import { useWallet } from 'solana-wallets-vue';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 
 export function useBonoWallet() {
-  const { connected, publicKey, signTransaction, sendTransaction } = useWallet();
+  const { connected, publicKey, signTransaction, sendTransaction, connect } = useWallet();
   const balance = ref(0);
 
   const shortenedAddress = computed(() => {
@@ -27,11 +27,12 @@ export function useBonoWallet() {
     
     const signed = await signTransaction.value(transaction);
     const connection = new Connection(process.env.VUE_APP_SOLANA_RPC_URL as string);
-    const signature = await sendTransaction.value(signed, connection);
+    const signature = await sendTransaction(signed, connection);
     
-    await connection.confirmTransaction(signature, 'confirmed');
-    return signature;
+    await connection.confirmTransaction(signature as string, 'confirmed');
+    return signature as string;
   };
+  
 
   return {
     connected,
@@ -39,6 +40,8 @@ export function useBonoWallet() {
     balance,
     shortenedAddress,
     fetchBalance,
-    signAndSendTransaction
+    signAndSendTransaction,
+    connect,
+    sendTransaction
   };
 }

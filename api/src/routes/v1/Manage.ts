@@ -9,6 +9,8 @@ import { SolanaManager } from "../../services/solana/SolanaManager";
 import { Campaign } from "../../entities/Campaign";
 import { HighTable } from "../../entities/HighTable";
 import { PublicKey } from "@solana/web3.js";
+import { CampaignStatus } from "../../models/types";
+
 
 const router = express.Router();
 
@@ -58,7 +60,8 @@ router.post(
             legalExpertise,
             status: 'active',
         });
-
+        
+        
         // Create NFT for the campaign
         const txData = await MetaplexManager.createCampaignNftTransaction(web3Conn, campaign, creator);
 
@@ -71,12 +74,19 @@ router.post(
         campaign.walletAddress = txData.tx.feePayer!.toBase58();
 
         // Create token for the campaign
-        const tokenMint = await SolanaManager.createToken(web3Conn, SolanaManager.getMainWalletKeypair(), 'CASE', 'CASE', 9, campaign.walletAddress);
+        const tokenMint = await SolanaManager.createToken(
+            web3Conn,
+            SolanaManager.getMainWalletKeypair(),
+            'CASE',
+            'CASE',
+            9,
+            campaign.walletAddress
+        );
         campaign.tokenMintAddress = tokenMint.toBase58();
 
         await campaign.save();
 
-        let encodedTransaction = txData.tx.serialize({
+        const encodedTransaction = txData.tx.serialize({
             requireAllSignatures: false,
             verifySignatures: false,
         });

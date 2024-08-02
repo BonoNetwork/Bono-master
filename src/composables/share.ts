@@ -1,7 +1,7 @@
-export const useShare = (func: Function, campaignId: string, title: string) => {
+export const useShare = (func: (url: string, title: string) => string, campaignId: string, title: string) => {
   const url = `https://app.bono.network/campaign/${campaignId}`;
   
-  if (func === 'copy') {
+  if (func.name === 'copy') {
     navigator.clipboard.writeText(url);
     return 'Copied to clipboard';
   } else if (typeof func === 'function') {

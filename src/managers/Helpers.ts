@@ -1,28 +1,27 @@
 export class Helpers {
-
-    static async sleep(seconds: number) {
+    static sleep = async (seconds: number): Promise<void> => {
         return new Promise(resolve => setTimeout(resolve, seconds * 1000));
     }
  
-    static getRandomInt(min: number, max: number) {
+    static getRandomInt = (min: number, max: number): number => {
         min = Math.ceil(min);
         max = Math.floor(max);
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    static getProbability(winProbability: number): boolean {
-        return this.getRandomInt(1, 10000) <= winProbability * 100;
+    static getProbability = (winProbability: number): boolean => {
+        return Helpers.getRandomInt(1, 10000) <= winProbability * 100;
     }   
 
-    static padNumber(d: number): string {
+    static padNumber = (d: number): string => {
         return (d < 10) ? '0' + d.toString() : d.toString();
     }
 
-    static numberWithCommas(x: number) {
+    static numberWithCommas = (x: number): string => {
         return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
-    static truncateString(str: string, len: number): string {
+    static truncateString = (str: string, len: number): string => {
         if (str.length <= len) { return str; }
 
         const n = Math.floor(len / 2);
@@ -33,32 +32,32 @@ export class Helpers {
         return subString1 + "..." + subString2;
     }
 
-    static shuffleArray(array: any[]) {
+    static shuffleArray = (array: any[]): void => {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
         }
     }
 
-    static differenceInSeconds(date1: Date, date2: Date): number {
+    static differenceInSeconds = (date1: Date, date2: Date): number => {
         const difference = Math.abs(date1.getTime() - date2.getTime());
         return Math.floor(difference / 1000);
     }
 
-    static formatNumber(num: number): string {
-        let formatter = Intl.NumberFormat('en', { notation: 'compact' });
+    static formatNumber = (num: number): string => {
+        const formatter = Intl.NumberFormat('en', { notation: 'compact' });
         return formatter.format(num);
     }
 
-    static formatCurrency(amount: number, currency: string = 'USD'): string {
+    static formatCurrency = (amount: number, currency: string = 'USD'): string => {
         return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency }).format(amount);
     }
 
-    static calculateFundingProgress(currentAmount: number, goalAmount: number): number {
+    static calculateFundingProgress = (currentAmount: number, goalAmount: number): number => {
         return Math.min((currentAmount / goalAmount) * 100, 100);
     }
 
-    static formatDate(date: Date): string {
+    static formatDate = (date: Date): string => {
         return new Intl.DateTimeFormat('en-US', {
             year: 'numeric',
             month: 'long',
@@ -68,18 +67,18 @@ export class Helpers {
         }).format(date);
     }
 
-    static generateCampaignSlug(title: string): string {
+    static generateCampaignSlug = (title: string): string => {
         return title
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)+/g, '');
     }
 
-    static isValidSolanaAddress(address: string): boolean {
+    static isValidSolanaAddress = (address: string): boolean => {
         return /^[A-HJ-NP-Za-km-z1-9]{32,44}$/.test(address);
     }
 
-    static timeLeft(endDate: Date): string {
+    static timeLeft = (endDate: Date): string => {
         const now = new Date();
         const diff = endDate.getTime() - now.getTime();
         
