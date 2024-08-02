@@ -20,6 +20,11 @@ export const validateRequest = (
 };
 
 function enhanceError(error: ValidationError, req: Request): ValidationError {
+    let maxDuration: number;
+    let endDate: Date;
+    let maxAllowedDate: Date;
+    let minGoal: number;
+
     switch (error.param) {
         case 'walletAddress':
             if (!Helpers.isValidSolanaAddress(req.body.walletAddress)) {
@@ -27,15 +32,15 @@ function enhanceError(error: ValidationError, req: Request): ValidationError {
             }
             break;
         case 'endDate':
-            const maxDuration = parseInt(process.env.MAX_CAMPAIGN_DURATION || '90');
-            const endDate = new Date(req.body.endDate);
-            const maxAllowedDate = Helpers.getDateWithDaysInc(new Date(), maxDuration);
+            maxDuration = parseInt(process.env.MAX_CAMPAIGN_DURATION || '90');
+            endDate = new Date(req.body.endDate);
+            maxAllowedDate = Helpers.getDateWithDaysInc(new Date(), maxDuration);
             if (endDate > maxAllowedDate) {
                 error.msg = `Campaign duration cannot exceed ${maxDuration} days`;
             }
             break;
         case 'goalAmount':
-            const minGoal = parseFloat(process.env.MIN_CAMPAIGN_GOAL || '1');
+            minGoal = parseFloat(process.env.MIN_CAMPAIGN_GOAL || '1');
             if (parseFloat(req.body.goalAmount) < minGoal) {
                 error.msg = `Campaign goal must be at least ${minGoal} SOL`;
             }

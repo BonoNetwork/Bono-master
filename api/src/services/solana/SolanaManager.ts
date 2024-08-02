@@ -16,6 +16,7 @@ import { HeliusAsset } from "./HeliusTypes";
 import { HeliusManager } from "./HeliusManager";
 import { Campaign } from "../../entities/Campaign";
 import { HighTable } from "../../entities/HighTable";
+import { mplCore } from "@metaplex-foundation/mpl-core";
 
 export interface CreateTransactionResponse {
     tx: web3.Transaction,
@@ -29,6 +30,7 @@ export enum DELEGATE_TYPE {
     StakingV1 = 'StakingV1',
     StandardV1 = 'StandardV1',
 }
+
 export class SolanaManager {
 
     static verify(message: string, walletId: string, signature: string): boolean {
@@ -42,7 +44,7 @@ export class SolanaManager {
         try {
             const transaction = web3.Transaction.from(Buffer.from(JSON.parse(signature)));
 
-            let isVerifiedSignatures = transaction.verifySignatures();
+            const isVerifiedSignatures = transaction.verifySignatures();
 
             if (!isVerifiedSignatures) {
                 return false;
@@ -61,10 +63,8 @@ export class SolanaManager {
         return false;
     }
 
-    
     static verifyMessage(message: string, walletId: string, signature: string): boolean {
         const messageBytes = new TextEncoder().encode(message);
-            
         const publicKeyBytes = base58.decode(walletId);
         const signatureBytes = base58.decode(signature);
 
@@ -76,7 +76,7 @@ export class SolanaManager {
             transaction.partialSign(privateKey);
         }
 
-        let isVerifiedSignatures = transaction.verifySignatures();
+        const isVerifiedSignatures = transaction.verifySignatures();
 
         const signatures = transaction.signatures;
         for (const signature of signatures) {
@@ -405,7 +405,6 @@ export class SolanaManager {
             transactions.push(txn);
         }
 
-
         console.log('transactions.length:', transactions.length);
         // Sign and send all transactions
         for (const tx of transactions) {
@@ -486,12 +485,9 @@ export class SolanaManager {
                     const tmpBalance = await web3Conn.getBalance(tokenAddress);
                     amount += tmpBalance;
                 }
-
-
             }
         }
-        catch (err: any) {
-        }
+        catch (err: any) { /* empty */ }
 
         return amount / web3.LAMPORTS_PER_SOL;
     }
@@ -522,12 +518,9 @@ export class SolanaManager {
 
         if (asset.compression.compressed){
             //TODO: implement burning for cNFT
-
-
             // mplBubblegum.burn(umi, {
                 
             // })
-
         }
         else {
             // implement burning for NFT & pNFT
@@ -627,7 +620,7 @@ export class SolanaManager {
         const holders: {walletAddress: string, amount: number}[] = [];
 
         try {
-            let response = await axios.post(process.env.SOLANA_RPC!, {
+            const response = await axios.post(process.env.SOLANA_RPC!, {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getProgramAccounts",
@@ -762,11 +755,11 @@ export class SolanaManager {
         const privateKey = web3.Keypair.fromSecretKey(new Uint8Array(JSON.parse(process.env.MAIN_WALLET_PRIVATE_KEY!)));
         return privateKey;
     }
-
+    
     static async createCampaignNFT(
         web3Conn: web3.Connection,
-        campaign: Campaign,
-        creator: HighTable
+        campaign: InstanceType<typeof Campaign>,
+        creator: InstanceType<typeof HighTable>
     ): Promise<{assetAddress: string, tokenMintAddress: string}> {
         console.log('----- createCampaignNFT -----');
     
@@ -793,7 +786,7 @@ export class SolanaManager {
                 name: metadata.name,
                 symbol: metadata.symbol,
                 uri: metadata.uri,
-                sellerFeeBasisPoints: 0,
+                sellerFeeBasisPoints: { basisPoints: 0, units: "%" },
                 isCollection: false,
             })
         );
@@ -849,7 +842,7 @@ export class SolanaManager {
             transferSol(umi, {
                 source: contributorSigner,
                 destination: publicKey(campaignWalletAddress),
-                amount: amount,
+                amount: sol(amount),
             })
         );
     
@@ -923,7 +916,7 @@ export class SolanaManager {
                     secretKey: new Uint8Array(), // This should be the campaign wallet's private key
                 }),
                 destination: publicKey(redeemerAddress),
-                amount: amount,
+                amount: sol(amount),
             })
         );
     
@@ -940,5 +933,76 @@ export class SolanaManager {
     
         return signature;
     }
-}
 
+    static async createToken(
+        connection: web3.Connection,
+        payer: web3.Keypair,
+        name: string,
+        symbol: string,
+        decimals: number,
+        ownerAddress: string
+    ): Promise<web3.PublicKey> {
+        const mintAccount = await spl.createMint(
+            connection,
+            payer,
+            payer.publicKey,
+            payer.publicKey,
+            decimals
+        );
+
+        // Create associated token account for the owner
+        const ownerPublicKey = new web3.PublicKey(ownerAddress);
+        const associatedTokenAccount = await spl.getOrCreateAssociatedTokenAccount(
+            connection,
+            payer,
+            mintAccount,
+            ownerPublicKey
+        );
+
+        return mintAccount;
+    }
+
+    static async contributeToCase(
+        connection: web3.Connection,
+        fromPublicKey: web3.PublicKey,
+        toPublicKey: web3.PublicKey,
+        tokenMintPublicKey: web3.PublicKey,
+        amount: number
+    ): Promise<web3.Transaction> {
+        const fromTokenAccount = await spl.getAssociatedTokenAddress(tokenMintPublicKey, fromPublicKey);
+        const toTokenAccount = await spl.getAssociatedTokenAddress(tokenMintPublicKey, toPublicKey);
+
+        const transaction = new web3.Transaction().add(
+            spl.createTransferInstruction(
+                fromTokenAccount,
+                toTokenAccount,
+                fromPublicKey,
+                amount
+            )
+        );
+
+        return transaction;
+    }
+
+    static async redeemCaseTokens(
+        connection: web3.Connection,
+        redeemerPublicKey: web3.PublicKey,
+        campaignPublicKey: web3.PublicKey,
+        tokenMintPublicKey: web3.PublicKey,
+        amount: number
+    ): Promise<web3.Transaction> {
+        const redeemerTokenAccount = await spl.getAssociatedTokenAddress(tokenMintPublicKey, redeemerPublicKey);
+        const campaignTokenAccount = await spl.getAssociatedTokenAddress(tokenMintPublicKey, campaignPublicKey);
+
+        const transaction = new web3.Transaction().add(
+            spl.createBurnInstruction(
+                redeemerTokenAccount,
+                tokenMintPublicKey,
+                redeemerPublicKey,
+                amount
+            )
+        );
+
+        return transaction;
+    }
+}

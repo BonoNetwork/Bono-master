@@ -33,7 +33,7 @@ export class Helpers {
           { value: 1e18, symbol: "E" }
         ];
         const rx = /\.0+$|(\.[0-9]*[1-9])0+$/;
-        var item = lookup.slice().reverse().find(function(item) {
+        const item = lookup.slice().reverse().find(function(item) {
           return num >= item.value;
         });
         return item ? (num / item.value).toFixed(digits).replace(rx, "$1") + item.symbol : "0";
@@ -57,10 +57,10 @@ export class Helpers {
         return resultDate;
     }
 
-    static getDateWithDaysInc(date: Date, daysInc: number) {
-        const resultDate = new Date(date.getTime());    
-        resultDate.setDate(date.getDate() + daysInc);
-        return resultDate;
+    static getDateWithDaysInc(date: Date, days: number): Date {
+        const result = new Date(date);
+        result.setDate(result.getDate() + days);
+        return result;
     }
 
     static isEmptyString(str: string | undefined): boolean {

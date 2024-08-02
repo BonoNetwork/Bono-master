@@ -17,8 +17,11 @@ import { HeliusManager } from "./HeliusManager";
 import { nftStorageUploader } from "@metaplex-foundation/umi-uploader-nft-storage";
 import * as mplCore from '@metaplex-foundation/mpl-core';
 import { CreateTransactionResponse, SolanaManager } from "./SolanaManager";
-import { Campaign } from "../../entities/Campaign";
-import { HighTable } from "../../entities/HighTable";
+import { Campaign } from "../../entities/Campaign";  
+import { HighTable } from "../../entities/HighTable"; 
+import { fetchAssetsByOwner, AssetV1 } from '@metaplex-foundation/mpl-core';
+
+
 
 export class MetaplexManager {
     
@@ -153,12 +156,12 @@ export class MetaplexManager {
         const umi = createUmi(process.env.SOLANA_RPC!);
         umi.use(mplCore.mplCore());
 
-        const owner = publicKey(walletAddress)
+        const owner = publicKey(walletAddress);
 
         const assetsByOwner = await mplCore.getAssetV1GpaBuilder(umi)
             .whereField('key', mplCore.Key.AssetV1)
             .whereField('owner', owner)
-            .getDeserialized()
+            .getDeserialized();
 
         return assetsByOwner;
     }
@@ -166,8 +169,8 @@ export class MetaplexManager {
     // New method for creating campaign NFT transactions
     static async createCampaignNftTransaction(
         web3Conn: web3.Connection,
-        campaign: Campaign,
-        creator: HighTable
+        campaign: InstanceType<typeof Campaign>, // Ensure correct type usage
+        creator: InstanceType<typeof HighTable>  // Ensure correct type usage
     ): Promise<CreateTransactionResponse & {assetAddress: string} | undefined> {
         const attributes = [
             {key: "title", value: campaign.title},
@@ -191,7 +194,7 @@ export class MetaplexManager {
             web3Conn,
             creator.walletAddress,
             campaign.walletAddress,
-            process.env.CAMPAIGN_COLLECTION_ADDRESS!, // Assuming you have a collection for campaigns
+            process.env.CAMPAIGN_COLLECTION_ADDRESS!, // hmmmmmm
             uri,
             attributes,
             false // Not frozen
@@ -199,10 +202,22 @@ export class MetaplexManager {
     }
 
     // New method to fetch campaign NFTs by owner
-    static async fetchCampaignNftsByOwner(walletAddress: string): Promise<mplCore.AssetV1[]> {
-        const assets = await this.fetchAssetsByOwner(walletAddress);
-        return assets.filter(asset => 
-            asset.collection?.key.toString() === process.env.CAMPAIGN_COLLECTION_ADDRESS
+    static async fetchCampaignNftsByOwner(walletAddress: string): Promise<AssetV1[]> {
+        const umi = createUmi(process.env.SOLANA_RPC!);
+        umi.use(mplCore.mplCore());
+
+        const owner = publicKey(walletAddress);
+
+        // Fetch all assets owned by the specified wallet
+        const assets = await fetchAssetsByOwner(umi, owner, {
+            skipDerivePlugins: false,
+        });
+
+        // Use the updateAuthority.address field to filter assets belonging to a collection
+        const campaignCollectionAddress = process.env.CAMPAIGN_COLLECTION_ADDRESS!;
+        
+        return assets.filter((asset: AssetV1) => 
+            asset.updateAuthority.address && asset.updateAuthority.address === campaignCollectionAddress
         );
     }
 }

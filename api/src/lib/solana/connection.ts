@@ -4,11 +4,12 @@ import {
   ConnectionConfig,
   ParsedTransactionWithMeta,
   PublicKey,
+  ParsedInstruction,
 } from "@solana/web3.js";
 
 export const maxSupportedTransactionVersion = 2;
 
-let connectionPool: Connection[] = [];
+const connectionPool: Connection[] = [];
 const MAX_POOL_SIZE = 5; // Adjust based on your needs
 
 export function getConnection(): Connection {
@@ -98,7 +99,14 @@ export async function fetchCampaignTransactions(
       instruction => {
         // You'll need to define these based on your specific program instructions
         const campaignInstructionTypes = ['createCampaign', 'contribute', 'withdraw', 'updateStatus'];
-        return campaignInstructionTypes.includes(instruction.parsed?.type);
+        
+        if ('parsed' in instruction) {
+          return campaignInstructionTypes.includes((instruction as ParsedInstruction).parsed.type);
+        } else {
+          // Handle PartiallyDecodedInstruction
+          // You might want to check the program ID or other properties
+          return instruction.programId.toString() === process.env.CAMPAIGN_PROGRAM_ID;
+        }
       }
     );
 

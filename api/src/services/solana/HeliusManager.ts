@@ -97,11 +97,11 @@ export class HeliusManager {
                 method: 'getAsset',
                 params: {
                     id: mintToken,
-                    displayOptions: {​
-                        showUnverifiedCollections: true,​
-                        showCollectionMetadata: false,​
-                        showFungible: false,​
-                        showInscription: false​
+                    displayOptions: {
+                        showUnverifiedCollections: true,
+                        showCollectionMetadata: false,
+                        showFungible: false,
+                        showInscription: false
                     }
                 },
             }),
