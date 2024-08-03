@@ -42,7 +42,7 @@ class Create {
 }
 
 export const mock = new Create(
-  "image1.png",
+  "bono-logo.png",
   {
     welcomingPhrase: "Submit Your Case",
     titlePlaceholder: "Case Title",
