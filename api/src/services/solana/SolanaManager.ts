@@ -375,7 +375,7 @@ export class SolanaManager {
 
         // Split an array into chunks of length `chunkSize`
         const chunks = <T>(array: T[], chunkSize = 10): T[][] => {
-            let res: T[][] = [];
+            const res: T[][] = [];
             for (let currentChunk = 0; currentChunk < array.length; currentChunk += chunkSize) {
                 res.push(array.slice(currentChunk, currentChunk + chunkSize));
             }
@@ -695,7 +695,7 @@ export class SolanaManager {
 
         const metaplex = new Metaplex(web3Conn);
         const umi = createUmi(process.env.SOLANA_RPC!);
-        umi.use(mplCore.mplCore());
+        //umi.use(mplCore.mplCore());
         const assetAddress = generateSigner(umi);
 
         return undefined;

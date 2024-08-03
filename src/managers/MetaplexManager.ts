@@ -1,9 +1,9 @@
 import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { publicKey, some, percentAmount } from "@metaplex-foundation/umi";
+import { publicKey, some, percentAmount, createSignerFromKeypair, type Signer } from "@metaplex-foundation/umi";
 import * as mplCore from '@metaplex-foundation/mpl-core';
 import * as mplTokenMetadata from '@metaplex-foundation/mpl-token-metadata';
 import { SolanaManager } from "./SolanaManager";
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js';
 
 export class MetaplexManager {
     static async fetchAssetsByOwner(walletAddress: string) {
@@ -26,14 +26,16 @@ export class MetaplexManager {
         web3Conn: Connection,
         campaign: any,
         creator: any
-    ): Promise<{ tx: any; blockhash: any; assetAddress: string } | undefined> {
+    ): Promise<{ tx: Transaction; blockhash: any; assetAddress: string } | undefined> {
         console.log('createCampaignNFT', campaign, creator);
 
         const umi = createUmi(import.meta.env.VITE_APP_SOLANA_RPC!);
         umi.use(mplTokenMetadata.mplTokenMetadata());
         
-        const creatorSigner = umi.eddsa.createKeypairFromSecretKey(new Uint8Array(creator.privateKey));
-        umi.use(mplCore.createSignerFromKeypair(umi, creatorSigner));
+        const creatorSigner = createSignerFromKeypair(umi, {
+            publicKey: publicKey(creator.publicKey),
+            secretKey: new Uint8Array(creator.privateKey),
+        });
 
         const nftMint = umi.eddsa.generateKeypair();
 
@@ -43,26 +45,24 @@ export class MetaplexManager {
             uri: campaign.metadataUri,
         };
 
-        let transactionBuilder = umi.transactionBuilder();
+        const createNftInstruction = mplTokenMetadata.createV1(umi, {
+            mint: nftMint.publicKey,
+            name: metadata.name,
+            symbol: metadata.symbol,
+            uri: metadata.uri,
+            sellerFeeBasisPoints: percentAmount(0),
+            collection: some({
+                key: publicKey(process.env.CAMPAIGN_COLLECTION_ADDRESS!),
+                verified: false
+            }),
+        });
 
-        transactionBuilder = transactionBuilder.add(
-            mplTokenMetadata.createV1(umi, {
-                mint: nftMint.publicKey,
-                name: metadata.name,
-                symbol: metadata.symbol,
-                uri: metadata.uri,
-                sellerFeeBasisPoints: percentAmount(0),
-                collection: some({
-                    key: publicKey(process.env.CAMPAIGN_COLLECTION_ADDRESS!),
-                    verified: false
-                }),
-            })
-        );
+        const transaction = new Transaction();
+        transaction.add(createNftInstruction as unknown as TransactionInstruction);
 
         const blockhash = await web3Conn.getLatestBlockhash();
-        transactionBuilder = transactionBuilder.setFeePayer(creatorSigner.publicKey);
-        transactionBuilder = transactionBuilder.setBlockhash(blockhash.blockhash);
-        const transaction = transactionBuilder.build(umi);
+        transaction.recentBlockhash = blockhash.blockhash;
+        transaction.feePayer = new PublicKey(creator.publicKey);
 
         return {
             tx: transaction,

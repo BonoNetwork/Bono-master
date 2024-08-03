@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { type PropType } from 'vue';
-import { formatDate, formatRelativeTime } from '@/composables/dateFormatter';
+import { formatDate, formatRelativeTime } from '@/composables/dateFormatter'; //might want to use the Helper.ts instead
 
 const props = defineProps({
   contributions: {

@@ -57,10 +57,10 @@ export class Helpers {
         return resultDate;
     }
 
-    static getDateWithDaysInc(date: Date, days: number): Date {
-        const result = new Date(date);
-        result.setDate(result.getDate() + days);
-        return result;
+    static getDateWithDaysInc(date: Date, daysInc: number) {
+        const resultDate = new Date(date.getTime());    
+        resultDate.setDate(date.getDate() + daysInc);
+        return resultDate;
     }
 
     static isEmptyString(str: string | undefined): boolean {

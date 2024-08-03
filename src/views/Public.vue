@@ -2,44 +2,44 @@
   <div class="min-h-screen bg-gradient-to-r from-blue-500 to-teal-400 py-12">
     <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
       <div class="p-8">
-        <h1 class="text-3xl font-bold mb-4">{{ currentCampaign.value?.title }}</h1>
-        <p class="text-gray-600 mb-6">{{ currentCampaign.value?.description }}</p>
+        <h1 class="text-3xl font-bold mb-4">{{ currentCampaign?.title }}</h1>
+        <p class="text-gray-600 mb-6">{{ currentCampaign?.description }}</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div class="bg-gray-100 p-6 rounded-lg">
             <h2 class="text-xl font-semibold mb-4">Case Statistics</h2>
-            <p><strong>Balance:</strong> {{ currentCampaign.value?.stats.balance }} {{ currentCampaign.value?.stats.currency }}</p>
-            <p><strong>Withdrawn:</strong> {{ currentCampaign.value?.stats.withdrawn }} {{ currentCampaign.value?.stats.currency }}</p>
-            <p><strong>Goal:</strong> {{ currentCampaign.value?.stats.goal }} {{ currentCampaign.value?.stats.currency }}</p>
-            <p><strong>Case Owner:</strong> {{ currentCampaign.value?.stats.caseOwner }}</p>
-            <p><strong>Legal Firm:</strong> {{ currentCampaign.value?.stats.legalFirm }}</p>
-            <p><strong>Status:</strong> {{ currentCampaign.value?.stats.status }}</p>
-            <p><strong>High Table Approval:</strong> {{ currentCampaign.value?.stats.highTableApproval }}</p>
+            <p><strong>Balance:</strong> {{ currentCampaign?.stats?.balance }} {{ currentCampaign?.stats?.currency }}</p>
+            <p><strong>Withdrawn:</strong> {{ currentCampaign?.stats?.withdrawn }} {{ currentCampaign?.stats?.currency }}</p>
+            <p><strong>Goal:</strong> {{ currentCampaign?.stats?.goal }} {{ currentCampaign?.stats?.currency }}</p>
+            <p><strong>Case Owner:</strong> {{ currentCampaign?.stats?.caseOwner }}</p>
+            <p><strong>Legal Firm:</strong> {{ currentCampaign?.stats?.legalFirm }}</p>
+            <p><strong>Status:</strong> {{ currentCampaign?.stats?.status }}</p>
+            <p><strong>High Table Approval:</strong> {{ currentCampaign?.stats?.highTableApproval }}</p>
           </div>
           <div class="bg-gray-100 p-6 rounded-lg">
             <h2 class="text-xl font-semibold mb-4">Case Details</h2>
-            <p><strong>Incident Date:</strong> {{ currentCampaign.value?.caseDetails.incidentDate }}</p>
-            <p><strong>Jurisdiction:</strong> {{ currentCampaign.value?.caseDetails.jurisdiction }}</p>
-            <p><strong>Case Type:</strong> {{ currentCampaign.value?.caseDetails.caseType }}</p>
-            <p><strong>Evidence Summary:</strong> {{ currentCampaign.value?.caseDetails.evidenceSummary }}</p>
+            <p><strong>Incident Date:</strong> {{ currentCampaign?.caseDetails?.incidentDate }}</p>
+            <p><strong>Jurisdiction:</strong> {{ currentCampaign?.caseDetails?.jurisdiction }}</p>
+            <p><strong>Case Type:</strong> {{ currentCampaign?.caseDetails?.caseType }}</p>
+            <p><strong>Evidence Summary:</strong> {{ currentCampaign?.caseDetails?.evidenceSummary }}</p>
           </div>
         </div>
 
         <div class="mb-8">
           <h2 class="text-2xl font-bold mb-4">Legal Update</h2>
           <div class="bg-blue-100 p-6 rounded-lg">
-            <p><strong>Last Update:</strong> {{ currentCampaign.value?.legalUpdate.lastUpdate }}</p>
-            <p><strong>Status:</strong> {{ currentCampaign.value?.legalUpdate.status }}</p>
-            <p><strong>Next Steps:</strong> {{ currentCampaign.value?.legalUpdate.nextSteps }}</p>
+            <p><strong>Last Update:</strong> {{ currentCampaign?.legalUpdate?.lastUpdate }}</p>
+            <p><strong>Status:</strong> {{ currentCampaign?.legalUpdate?.status }}</p>
+            <p><strong>Next Steps:</strong> {{ currentCampaign?.legalUpdate?.nextSteps }}</p>
           </div>
         </div>
 
         <div class="mb-8">
-          <h2 class="text-2xl font-bold mb-4">{{ currentCampaign.value?.contribution?.title }}</h2>
-          <p class="text-sm text-gray-600 mb-4">{{ currentCampaign.value?.contribution?.fee }}</p>
+          <h2 class="text-2xl font-bold mb-4">{{ currentCampaign?.contribution?.title }}</h2>
+          <p class="text-sm text-gray-600 mb-4">{{ currentCampaign?.contribution?.fee }}</p>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <button
-              v-for="option in currentCampaign.value?.contribution?.options"
+              v-for="option in currentCampaign?.contribution?.options"
               :key="option.id"
               @click="selectContributionAmount(option.amount)"
               class="p-4 border rounded-lg hover:bg-gray-100 transition-colors"
@@ -51,14 +51,14 @@
           <div class="mb-4">
             <input
               v-model="contributorName"
-              :placeholder="currentCampaign.value?.contribution?.field1Placeholder"
+              :placeholder="currentCampaign?.contribution?.field1Placeholder"
               class="w-full p-2 border rounded-lg"
             />
           </div>
           <div class="mb-4">
             <textarea
               v-model="contributorComment"
-              :placeholder="currentCampaign.value?.contribution?.field2Placeholder"
+              :placeholder="currentCampaign?.contribution?.field2Placeholder"
               class="w-full p-2 border rounded-lg"
               rows="3"
             ></textarea>
@@ -67,12 +67,12 @@
             @click="contribute"
             class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors"
           >
-            {{ currentCampaign.value?.contribution?.buttonText }}
+            {{ currentCampaign?.contribution?.buttonText }}
           </button>
         </div>
 
         <div class="mb-8">
-          <h2 class="text-2xl font-bold mb-4">{{ currentCampaign.value?.contribution?.contributionsText }}</h2>
+          <h2 class="text-2xl font-bold mb-4">{{ currentCampaign?.contribution?.contributionsText }}</h2>
           <div class="bg-gray-100 p-4 rounded-lg">
             <!-- Add a list of recent contributions here -->
           </div>
@@ -82,7 +82,7 @@
           <h2 class="text-2xl font-bold mb-4">Share This Case</h2>
           <div class="flex space-x-4">
             <button
-              v-for="btn in currentCampaign.value?.shareTo.btns"
+              v-for="btn in currentCampaign?.shareTo.btns"
               :key="btn.text"
               @click="share(btn.actionLink)"
               class="py-2 px-4 rounded-lg text-white"
@@ -93,7 +93,7 @@
           </div>
         </div>
 
-        <div class="text-sm text-gray-600" v-html="currentCampaign.value?.legalDisclaimer.text"></div>
+        <div class="text-sm text-gray-600" v-html="currentCampaign?.legalDisclaimer.text"></div>
       </div>
     </div>
   </div>
@@ -198,7 +198,7 @@ const makeDonation = async () => {
 
   try {
     await contributeToCampaign(route.params.public_key as string, {
-      amount: parseFloat(amountInput.value.value),
+      amount: parseFloat(amountInput.value?.value || '0'),
       contributorAddress: publicKey.toString(),
       name: field1.value,
       comment: field2.value,

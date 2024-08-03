@@ -32,7 +32,7 @@ export function useBonoWallet() {
     await connection.confirmTransaction(signature as string, 'confirmed');
     return signature as string;
   };
-  
+
 
   return {
     connected,

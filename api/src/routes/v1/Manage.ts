@@ -128,7 +128,7 @@ router.post(
         campaign.contributors.push({ address: contributorAddress, amount, date: new Date() });
 
         if (campaign.currentAmount >= campaign.goalAmount) {
-            campaign.status = 'funded';
+            campaign.status = CampaignStatus.FUNDED;
         }
 
         await campaign.save();
@@ -155,7 +155,7 @@ router.post(
             throw new BadRequestError('Campaign not found');
         }
 
-        if (campaign.status !== 'won') {
+        if (campaign.status !== CampaignStatus.WON) {
             throw new BadRequestError('Campaign has not been won yet');
         }
 

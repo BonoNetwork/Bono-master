@@ -26,8 +26,8 @@ export const errorHandler = (
         response = new ErrorResponse([{ 
             code: 400, 
             message: err.message, 
-            required: err.required, 
-            available: err.available 
+            ...(('required' in err) && { required: err.required }), 
+            ...(('available' in err) && { available: err.available }), 
         }]);
         return res.status(err.statusCode).send(response);
     }
