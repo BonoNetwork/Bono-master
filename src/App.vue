@@ -4,8 +4,7 @@ import { provide, ref } from "vue";
 import { RouterView } from 'vue-router';
 import Navigation from '@/components/Navigation.vue';
 
-let walletModalProviderRef = ref();
-
+const walletModalProviderRef = ref();
 provide('walletModalProviderRef', walletModalProviderRef);
 </script>
 
