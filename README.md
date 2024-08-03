@@ -1,4 +1,5 @@
 # Bono Network
+![bono](https://github.com/user-attachments/assets/aec0eb26-a7a3-48be-8cc2-2002f64c67df)
 
 Bono Network is a decentralized platform for legal fundraising campaigns built on the Solana blockchain. It facilitates fundraising for legal cases related to scams and fraud, connecting case creators, contributors, a High Table for governance, and legal firms.
 
